@@ -4192,7 +4192,7 @@ setDokodemoDoorUnblockStreamingMediaInbounds() {
         "followRedirect": false
       },
       "sniffing": {
-        "enabled": true,
+        "enabled": false,
         "destOverride": [
           "http"
         ]
@@ -4210,7 +4210,7 @@ setDokodemoDoorUnblockStreamingMediaInbounds() {
         "followRedirect": false
       },
       "sniffing": {
-        "enabled": true,
+        "enabled": false,
         "destOverride": [
           "tls"
         ]
