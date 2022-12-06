@@ -212,17 +212,17 @@ readInstallType() {
 	# 1.检测安装目录
 	if [[ -d "/etc/v2ray-agent" ]]; then
 		# 检测安装方式 v2ray-core
-		if [[ -d "/etc/v2ray-agent/v2ray" && -f "/etc/v2ray-agent/v2ray/v2ray" && -f "/etc/v2ray-agent/v2ray/v2ctl" ]]; then
+		if [[ -d "/etc/v2ray-agent/v2ray" && -f "/etc/v2ray-agent/v2ray/v2ray" ]]; then
 			if [[ -d "/etc/v2ray-agent/v2ray/conf" && -f "/etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json" ]]; then
 				configPath=/etc/v2ray-agent/v2ray/conf/
 
 				if grep </etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q '"security": "tls"'; then
 					# 不带XTLS的v2ray-core
 					coreInstallType=2
-					ctlPath=/etc/v2ray-agent/v2ray/v2ctl
+					
 				elif grep </etc/v2ray-agent/v2ray/conf/02_VLESS_TCP_inbounds.json -q '"security": "xtls"'; then
 					# 带XTLS的v2ray-core
-					ctlPath=/etc/v2ray-agent/v2ray/v2ctl
+					ctlPath=/etc/v2ray-agent/v2ray/v2ray
 					coreInstallType=3
 				fi
 			fi
@@ -821,7 +821,7 @@ server {
 }
 EOF
 		# 启动nginx
-		handleNginx start
+		# handleNginx start
 		checkIP
 	fi
 }
@@ -987,9 +987,8 @@ EOF
 # 检查ip
 checkIP() {
 	echoContent skyBlue "\n ---> 检查域名ip中"
-	curl -s -m 2 "${domain}/ip"
-	
-
+	localIP=$(curl -s -m 2 "${domain}/ip")
+	echo $localIP
 }
 # 自定义email
 customSSLEmail() {
@@ -1069,7 +1068,7 @@ installTLS() {
 
 		switchSSLType
 		customSSLEmail
-		read -sp "回车后继续。。。"
+		
 		if echo "${localIP}" | grep -q ":"; then
 			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server "${sslType}" --listen-v6 2>&1 | tee -a /etc/v2ray-agent/tls/acme.log >/dev/null
 		else
@@ -1344,14 +1343,12 @@ installV2Ray() {
 		if [[ "${selectCoreType}" == "3" ]]; then
 			echoContent green " ---> 锁定v2ray-core版本为v4.32.1"
 			rm -f /etc/v2ray-agent/v2ray/v2ray
-			rm -f /etc/v2ray-agent/v2ray/v2ctl
 			installV2Ray "$1"
 		else
 			echoContent green " ---> v2ray-core版本:$(/etc/v2ray-agent/v2ray/v2ray --version | awk '{print $2}' | head -1)"
 			read -r -p "是否更新、升级？[y/n]:" reInstallV2RayStatus
 			if [[ "${reInstallV2RayStatus}" == "y" ]]; then
 				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
 				installV2Ray "$1"
 			fi
 		fi
@@ -1527,7 +1524,6 @@ updateV2Ray() {
 
 				handleV2Ray stop
 				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
 				updateV2Ray "${version}"
 			else
 				echoContent green " ---> 放弃回退版本"
@@ -1537,7 +1533,6 @@ updateV2Ray() {
 			if [[ "${reInstallV2RayStatus}" == "y" ]]; then
 				handleV2Ray stop
 				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
 				updateV2Ray
 			else
 				echoContent green " ---> 放弃重新安装"
@@ -1546,7 +1541,6 @@ updateV2Ray() {
 			read -r -p "最新版本为:${version}，是否更新？[y/n]:" installV2RayStatus
 			if [[ "${installV2RayStatus}" == "y" ]]; then
 				rm -f /etc/v2ray-agent/v2ray/v2ray
-				rm -f /etc/v2ray-agent/v2ray/v2ctl
 				updateV2Ray
 			else
 				echoContent green " ---> 放弃更新"
@@ -1819,16 +1813,16 @@ initV2RayConfig() {
 			uuid=${currentUUID}
 			addClientsStatus=true
 		else
-			uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+			uuid=$(/etc/v2ray-agent/v2ray/v2ray uuid)
 		fi
 	elif [[ -z "${uuid}" ]]; then
-		uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+		uuid=$(/etc/v2ray-agent/v2ray/v2ray uuid)
 	fi
 
 	if [[ -z "${uuid}" ]]; then
 		addClientsStatus=
 		echoContent red "\n ---> uuid读取错误，重新生成"
-		uuid=$(/etc/v2ray-agent/v2ray/v2ctl uuid)
+		uuid=$(/etc/v2ray-agent/v2ray/v2ray uuid)
 	fi
 
 	movePreviousConfig
