@@ -1069,7 +1069,7 @@ installTLS() {
 
 		switchSSLType
 		customSSLEmail
-
+		sleep 1s
 		if echo "${localIP}" | grep -q ":"; then
 			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server "${sslType}" --listen-v6 2>&1 | tee -a /etc/v2ray-agent/tls/acme.log >/dev/null
 		else
