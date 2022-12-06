@@ -988,7 +988,7 @@ EOF
 checkIP() {
 	echoContent skyBlue "\n ---> 检查域名ip中"
 	localIP=$(wget -T1 -t1 -qO- -6 ip.gs)
-	if [[-n $localIP]]; then 
+	if [[ -n $localIP ]]; then 
 		echo $localIP
 	else 
 		localIP=$(wget -T1 -t1 -qO- -4 ip.gs)
