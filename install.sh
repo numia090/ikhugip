@@ -1069,7 +1069,7 @@ installTLS() {
 
 		switchSSLType
 		customSSLEmail
-
+echo "localIP=${localIP}"
 		if echo "${localIP}" | grep -q ":"; then
 			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server "${sslType}" --listen-v6 2>&1 | tee -a /etc/v2ray-agent/tls/acme.log >/dev/null
 		else
@@ -1325,7 +1325,7 @@ installV2Ray() {
 	if [[ "${coreInstallType}" != "2" && "${coreInstallType}" != "3" ]]; then
 		if [[ "${selectCoreType}" == "2" ]]; then
 
-			version=$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | grep -v 'v5' | head -1)
+			version="$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases/latest|sed 'y/,/\n/' | grep 'tag_name' | awk -F '"' '{print $4}')"
 		else
 			version=${v2rayCoreVersion}
 		fi
@@ -1409,7 +1409,7 @@ v2rayVersionManageMenu() {
 		echoContent yellow "2.不保证回退后一定可以正常使用"
 		echoContent yellow "3.如果回退的版本不支持当前的config，则会无法连接，谨慎操作"
 		echoContent skyBlue "------------------------Version-------------------------------"
-		curl -s https://api.github.com/repos/v2fly/v2ray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | grep -v 'v5' | head -5 | awk '{print ""NR""":"$0}'
+		curl -s https://api.github.com/repos/v2fly/v2ray-core/releases/latest|sed 'y/,/\n/' | grep 'tag_name' | awk -F '"' '{print $4}'
 
 		echoContent skyBlue "--------------------------------------------------------------"
 		read -r -p "请输入要回退的版本:" selectV2rayVersionType
@@ -1485,7 +1485,7 @@ updateV2Ray() {
 		if [[ -n "$1" ]]; then
 			version=$1
 		else
-			version=$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | grep -v 'v5' | head -1)
+			version="$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases/latest|sed 'y/,/\n/' | grep 'tag_name' | awk -F '"' '{print $4}')"
 		fi
 		# 使用锁定的版本
 		if [[ -n "${v2rayCoreVersion}" ]]; then
@@ -1509,7 +1509,7 @@ updateV2Ray() {
 		if [[ -n "$1" ]]; then
 			version=$1
 		else
-			version=$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases | jq -r '.[]|select (.prerelease==false)|.tag_name' | grep -v 'v5' | head -1)
+			version="$(curl -s https://api.github.com/repos/v2fly/v2ray-core/releases/latest|sed 'y/,/\n/' | grep 'tag_name' | awk -F '"' '{print $4}')"
 		fi
 
 		if [[ -n "${v2rayCoreVersion}" ]]; then
@@ -1642,7 +1642,7 @@ installV2RayService() {
 	if [[ -n $(find /bin /usr/bin -name "systemctl") ]]; then
 		rm -rf /etc/systemd/system/v2ray.service
 		touch /etc/systemd/system/v2ray.service
-		execStart='/etc/v2ray-agent/v2ray/v2ray -confdir /etc/v2ray-agent/v2ray/conf'
+		execStart='/etc/v2ray-agent/v2ray/v2ray run -confdir /etc/v2ray-agent/v2ray/conf'
 		cat <<EOF >/etc/systemd/system/v2ray.service
 [Unit]
 Description=V2Ray - A unified platform for anti-censorship
