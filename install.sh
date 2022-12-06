@@ -1069,7 +1069,7 @@ installTLS() {
 
 		switchSSLType
 		customSSLEmail
-echo "localIP=${localIP}"
+
 		if echo "${localIP}" | grep -q ":"; then
 			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server "${sslType}" --listen-v6 2>&1 | tee -a /etc/v2ray-agent/tls/acme.log >/dev/null
 		else
@@ -1228,6 +1228,7 @@ handleNginx() {
 		if [[ -n $(pgrep -f "nginx") ]]; then
 			pgrep -f "nginx" | xargs kill -9
 		fi
+		echo ""
 		echoContent green " ---> Nginx关闭成功"
 	fi
 }
