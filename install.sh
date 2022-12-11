@@ -987,11 +987,11 @@ EOF
 # 检查ip
 checkIP() {
 	echoContent skyBlue "\n ---> 检查域名ip中"
-	localIP=$(wget -T1 -t1 -qO- -6 ip.gs)
+	localIP=$(curl -s6m6 ip.p3terx.com -k | sed -n 1p)
 	if [[ -n $localIP ]]; then 
 		echo $localIP
 	else 
-		localIP=$(wget -T1 -t1 -qO- -4 ip.gs)
+		localIP=$(curl -s4m6 ip.p3terx.com -k | sed -n 1p)
 		echo $localIP
 	fi
 }
